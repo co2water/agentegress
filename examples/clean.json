@@ -1,0 +1,212 @@
+{
+  "time": "2026-09-25T09:00:00Z",
+  "elevated": false,
+  "took_ns": 0,
+  "coverage": {
+    "processes": 6,
+    "unreadable": 0,
+    "agent_tree_processes": 4,
+    "agent_tree_unreadable": 0,
+    "dns_cached_addresses": 2,
+    "limits": [
+      "TCP only: UDP/QUIC (HTTP/3) peers are not visible",
+      "not elevated: only scheduled tasks visible to this user are listed",
+      "logon history not checked: needs administrator rights to read the Security log",
+      "1 autostart targets inside System32/SysWOW64 were not signature-checked (only administrators can change files there)"
+    ]
+  },
+  "agent_roots": [
+    2000
+  ],
+  "processes": {
+    "1000": {
+      "pid": 1000,
+      "ppid": 4,
+      "name": "explorer.exe",
+      "path": "C:\\Windows\\explorer.exe",
+      "cmdline": "C:\\Windows\\explorer.exe",
+      "created": "2026-09-25T09:00:02Z",
+      "readable": true,
+      "parent": 4
+    },
+    "2000": {
+      "pid": 2000,
+      "ppid": 1000,
+      "name": "claude.exe",
+      "path": "C:\\Program Files\\WindowsApps\\Claude_1.0.0.0_x64__pzs8sxrjxfjjc\\app\\claude.exe",
+      "cmdline": "\"C:\\Program Files\\WindowsApps\\Claude_1.0.0.0_x64__pzs8sxrjxfjjc\\app\\claude.exe\"",
+      "created": "2026-09-25T09:00:03Z",
+      "readable": true,
+      "agent": "Claude Desktop",
+      "agent_root": 2000,
+      "owner": "Claude Desktop",
+      "signature": {
+        "status": "signed",
+        "signer": "Anthropic, PBC"
+      },
+      "parent": 1000
+    },
+    "2001": {
+      "pid": 2001,
+      "ppid": 2000,
+      "name": "claude.exe",
+      "path": "C:\\Program Files\\WindowsApps\\Claude_1.0.0.0_x64__pzs8sxrjxfjjc\\app\\claude.exe",
+      "cmdline": "\"C:\\Program Files\\WindowsApps\\Claude_1.0.0.0_x64__pzs8sxrjxfjjc\\app\\claude.exe\" --type=utility --utility-sub-type=network.mojom.NetworkService",
+      "created": "2026-09-25T09:00:04Z",
+      "readable": true,
+      "agent": "Claude Desktop",
+      "helper": true,
+      "agent_root": 2000,
+      "owner": "Claude Desktop",
+      "signature": {
+        "status": "signed",
+        "signer": "Anthropic, PBC"
+      },
+      "parent": 2000
+    },
+    "2100": {
+      "pid": 2100,
+      "ppid": 2000,
+      "name": "claude.exe",
+      "path": "C:\\Users\\alice\\AppData\\Roaming\\Claude\\claude-code\\2.1.0\\claude.exe",
+      "cmdline": "C:\\Users\\alice\\AppData\\Roaming\\Claude\\claude-code\\2.1.0\\claude.exe --output-format stream-json",
+      "created": "2026-09-25T09:00:05Z",
+      "readable": true,
+      "agent": "Claude Code",
+      "agent_root": 2000,
+      "owner": "Claude Code",
+      "user_writable_dir": true,
+      "signature": {
+        "status": "signed",
+        "signer": "Anthropic, PBC"
+      },
+      "parent": 2000
+    },
+    "2110": {
+      "pid": 2110,
+      "ppid": 2100,
+      "name": "node.exe",
+      "path": "C:\\Program Files\\nodejs\\node.exe",
+      "cmdline": "node C:\\Users\\alice\\AppData\\Local\\npm-cache\\_npx\\1\\node_modules\\@modelcontextprotocol\\server-github\\dist\\index.js",
+      "created": "2026-09-25T09:00:06Z",
+      "readable": true,
+      "agent_root": 2000,
+      "owner": "Claude Code",
+      "mcp": "github",
+      "mcp_client": "Claude Code",
+      "signature": {
+        "status": "signed",
+        "signer": "OpenJS Foundation"
+      },
+      "parent": 2100
+    },
+    "3000": {
+      "pid": 3000,
+      "ppid": 1000,
+      "name": "chrome.exe",
+      "path": "C:\\Program Files\\Google\\Chrome\\Application\\chrome.exe",
+      "cmdline": "chrome.exe",
+      "created": "2026-09-25T09:00:07Z",
+      "readable": true,
+      "signature": {
+        "status": "signed",
+        "signer": "Google LLC"
+      },
+      "parent": 1000
+    },
+    "4": {
+      "pid": 4,
+      "ppid": 0,
+      "name": "System",
+      "created": "2026-09-25T09:00:01Z",
+      "readable": false
+    }
+  },
+  "connections": [
+    {
+      "pid": 2001,
+      "state": "ESTABLISHED",
+      "local": "192.168.1.50:50000",
+      "remote": "160.79.104.10:443",
+      "org": "Anthropic",
+      "external": true
+    },
+    {
+      "pid": 2100,
+      "state": "ESTABLISHED",
+      "local": "192.168.1.50:50000",
+      "remote": "160.79.104.10:443",
+      "org": "Anthropic",
+      "external": true
+    },
+    {
+      "pid": 2110,
+      "state": "ESTABLISHED",
+      "local": "192.168.1.50:50000",
+      "remote": "140.82.112.6:443",
+      "hosts": [
+        "api.github.com"
+      ],
+      "org": "GitHub",
+      "external": true
+    },
+    {
+      "pid": 3000,
+      "state": "ESTABLISHED",
+      "local": "192.168.1.50:50000",
+      "remote": "142.250.72.14:443",
+      "hosts": [
+        "www.google.com"
+      ],
+      "org": "Google",
+      "external": true
+    }
+  ],
+  "mcp_servers": [
+    {
+      "client": "Claude Code",
+      "name": "github",
+      "source": "C:\\Users\\alice\\.claude.json",
+      "command": "npx",
+      "args": [
+        "-y",
+        "@modelcontextprotocol/server-github"
+      ],
+      "env_keys": [
+        "GITHUB_TOKEN"
+      ]
+    }
+  ],
+  "autostarts": [
+    {
+      "kind": "run-key",
+      "scope": "user",
+      "location": "HKCU\\Software\\Microsoft\\Windows\\CurrentVersion\\Run",
+      "name": "OneDrive",
+      "command": "\"C:\\Program Files\\Microsoft OneDrive\\OneDrive.exe\" /background",
+      "target": "C:\\Program Files\\Microsoft OneDrive\\OneDrive.exe",
+      "signature": {
+        "status": "signed",
+        "signer": "Microsoft Corporation"
+      }
+    },
+    {
+      "kind": "service",
+      "scope": "machine",
+      "location": "HKLM\\SYSTEM\\CurrentControlSet\\Services\\Spooler",
+      "name": "Spooler",
+      "command": "C:\\Windows\\System32\\spoolsv.exe",
+      "target": "C:\\Windows\\System32\\spoolsv.exe"
+    }
+  ],
+  "host": {
+    "rdp_enabled": false,
+    "rdp_known": true,
+    "firewall_known": true
+  },
+  "logons": {
+    "checked": false,
+    "reason": "needs administrator rights to read the Security log",
+    "hours": 24
+  }
+}

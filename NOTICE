@@ -1,0 +1,14 @@
+agentegress embeds internal/ipowner/ranges.txt, a list of IP prefixes generated
+by tools/genranges from ranges the providers themselves publish:
+
+  Cloudflare       https://www.cloudflare.com/ips-v4, https://www.cloudflare.com/ips-v6
+  Google           https://www.gstatic.com/ipranges/goog.json, cloud.json
+  Amazon AWS       https://ip-ranges.amazonaws.com/ip-ranges.json
+  GitHub           https://api.github.com/meta
+  Fastly           https://api.fastly.com/public-ip-list
+  Microsoft 365    https://endpoints.office.com/endpoints/worldwide
+  Anthropic        ARIN RDAP registration records (checked by hand)
+
+The address ranges and organisation names belong to their respective owners.
+They are included only to label network peers, may be out of date, and come
+with no warranty. Regenerate them with `go run ./tools/genranges`.

@@ -1,0 +1,53 @@
+name: release
+
+on:
+  push:
+    tags: ['v*']
+
+permissions:
+  contents: write     # create the release
+  id-token: write     # sign build provenance
+  attestations: write # store build provenance
+
+jobs:
+  release:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-go@v5
+        with:
+          go-version-file: go.mod
+          cache: true
+
+      - run: go vet ./...
+
+      - run: go test ./...
+
+      - name: build
+        shell: bash
+        run: |
+          set -euo pipefail
+          version="${GITHUB_REF_NAME}"
+          mkdir -p dist
+          for arch in amd64 arm64; do
+            GOOS=windows GOARCH=$arch go build -trimpath -ldflags "-s -w" \
+              -o "dist/agentegress.exe" ./cmd/agentegress
+            (cd dist && 7z a -tzip "agentegress_${version}_windows_${arch}.zip" agentegress.exe ../LICENSE ../NOTICE ../README.md >/dev/null)
+            rm dist/agentegress.exe
+          done
+          (cd dist && sha256sum *.zip > checksums.txt && cat checksums.txt)
+
+      # Anyone can check a download came from this workflow:
+      #   gh attestation verify agentegress_<tag>_windows_amd64.zip -R co2water/agentegress
+      - uses: actions/attest-build-provenance@v2
+        with:
+          subject-path: 'dist/*.zip'
+
+      - name: publish release
+        shell: bash
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          gh release create "$GITHUB_REF_NAME" dist/*.zip dist/checksums.txt \
+            --title "$GITHUB_REF_NAME" --generate-notes --prerelease
