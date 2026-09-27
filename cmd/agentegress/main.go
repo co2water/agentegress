@@ -10,6 +10,8 @@ import (
 	"flag"
 	"fmt"
 	"os"
+	"runtime/debug"
+	"strings"
 	"sync"
 	"time"
 
@@ -20,7 +22,20 @@ import (
 	"github.com/co2water/agentegress/internal/snapshot"
 )
 
-const version = "0.0.3-w3"
+// version is set by the release build (-ldflags "-X main.version=0.1.1").
+// Otherwise it comes from the module version Go records in the binary
+// (go install …@v0.1.1), or "dev" for a plain local build.
+var version = ""
+
+func init() {
+	if version != "" {
+		return
+	}
+	version = "dev"
+	if bi, ok := debug.ReadBuildInfo(); ok && bi.Main.Version != "" && bi.Main.Version != "(devel)" {
+		version = strings.TrimPrefix(bi.Main.Version, "v")
+	}
+}
 
 const usage = `agentegress — see what your AI agents and their MCP servers connect to,
 and check this PC for signs of compromise.

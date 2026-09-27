@@ -31,8 +31,12 @@ jobs:
           version="${GITHUB_REF_NAME}"
           mkdir -p dist
           for arch in amd64 arm64; do
-            GOOS=windows GOARCH=$arch go build -trimpath -ldflags "-s -w" \
+            GOOS=windows GOARCH=$arch go build -trimpath -ldflags "-s -w -X main.version=${version#v}" \
               -o "dist/agentegress.exe" ./cmd/agentegress
+            if [ "$arch" = amd64 ]; then
+              got="$(dist/agentegress.exe version)"
+              [ "$got" = "agentegress ${version#v}" ] || { echo "version mismatch: $got"; exit 1; }
+            fi
             (cd dist && 7z a -tzip "agentegress_${version}_windows_${arch}.zip" agentegress.exe ../LICENSE ../NOTICE ../README.md >/dev/null)
             rm dist/agentegress.exe
           done
