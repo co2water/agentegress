@@ -49,6 +49,7 @@ open to the network. Recording made with `go run ./tools/democast` and
   [latest release](https://github.com/co2water/agentegress/releases/latest). Every asset has a
   SHA-256 in `checksums.txt` and a build attestation:
   `gh attestation verify <file> -R co2water/agentegress`.
+- **Scoop:** `scoop install https://raw.githubusercontent.com/co2water/agentegress/main/packaging/scoop/agentegress.json`
 - **From source (Go 1.27+):** `go install github.com/co2water/agentegress/cmd/agentegress@latest`
 
 ## Use

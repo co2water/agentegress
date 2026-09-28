@@ -1,0 +1,22 @@
+{
+  "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
+  "name": "io.github.co2water/agentegress",
+  "title": "agentegress",
+  "description": "See which AI agent and MCP server talks to what on Windows, with a rule-based security verdict",
+  "repository": {
+    "url": "https://github.com/co2water/agentegress",
+    "source": "github"
+  },
+  "websiteUrl": "https://github.com/co2water/agentegress",
+  "version": "0.1.2",
+  "packages": [
+    {
+      "registryType": "mcpb",
+      "identifier": "https://github.com/co2water/agentegress/releases/download/v0.1.2/agentegress-windows.mcpb",
+      "fileSha256": "2bb77f31ecd0595879e4094451cdc4ab68badb8af9c27a074d78b9cb4ea89930",
+      "transport": {
+        "type": "stdio"
+      }
+    }
+  ]
+}

@@ -1,0 +1,31 @@
+{
+    "version": "0.1.2",
+    "description": "See which AI agent and MCP server talks to what on your Windows PC, and check it for signs of compromise.",
+    "homepage": "https://github.com/co2water/agentegress",
+    "license": "MIT",
+    "architecture": {
+        "64bit": {
+            "url": "https://github.com/co2water/agentegress/releases/download/v0.1.2/agentegress_v0.1.2_windows_amd64.zip",
+            "hash": "2ddfed53d7f5456e6644cbea6b17bfac3861354ce2221a079654f47f39ea11b4"
+        },
+        "arm64": {
+            "url": "https://github.com/co2water/agentegress/releases/download/v0.1.2/agentegress_v0.1.2_windows_arm64.zip",
+            "hash": "16cdea4eddcd0e8c6b648e64379463c723ecde5f108c168dd65bdd124efbd62a"
+        }
+    },
+    "bin": "agentegress.exe",
+    "checkver": "github",
+    "autoupdate": {
+        "architecture": {
+            "64bit": {
+                "url": "https://github.com/co2water/agentegress/releases/download/v$version/agentegress_v$version_windows_amd64.zip"
+            },
+            "arm64": {
+                "url": "https://github.com/co2water/agentegress/releases/download/v$version/agentegress_v$version_windows_arm64.zip"
+            }
+        },
+        "hash": {
+            "url": "$baseurl/checksums.txt"
+        }
+    }
+}
