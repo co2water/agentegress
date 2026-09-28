@@ -1,0 +1,44 @@
+{
+  "manifest_version": "0.3",
+  "name": "agentegress",
+  "display_name": "agentegress",
+  "version": "0.0.0",
+  "description": "See which AI agent and MCP server is talking to what on this Windows PC, and check it for signs of compromise.",
+  "long_description": "agentegress walks the live process tree from each AI agent (Claude Code, Claude Desktop, Cursor, VS Code, Codex, ...) down to the MCP servers and scripts it started, attributes every TCP connection and listener, and checks the PC for signs of compromise: unsigned programs talking out or listening, autostarts, firewall, Remote Desktop.\n\nThe verdict comes from deterministic rules, not from the model. Everything read from the machine is returned under `untrusted` keys, and text that tries to instruct an AI is reported as a finding. Read-only; it opens no network connection of its own. The tool results (process names, paths, command lines with known credential formats masked, connection addresses) are sent to your model provider as part of the conversation, like any tool output.",
+  "author": {
+    "name": "co2water",
+    "url": "https://github.com/co2water"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/co2water/agentegress.git"
+  },
+  "homepage": "https://github.com/co2water/agentegress",
+  "documentation": "https://github.com/co2water/agentegress#readme",
+  "support": "https://github.com/co2water/agentegress/issues",
+  "icon": "icon.png",
+  "server": {
+    "type": "binary",
+    "entry_point": "agentegress.exe",
+    "mcp_config": {
+      "command": "${__dirname}/agentegress.exe",
+      "args": ["mcp"],
+      "env": {}
+    }
+  },
+  "tools": [
+    {"name": "scan_summary", "description": "Scan this PC and return the rule-based verdict, the findings that must be reported, the running AI agents with their MCP servers, and what could not be checked."},
+    {"name": "list_findings", "description": "Every finding from the rules, most severe first."},
+    {"name": "list_agents", "description": "Process trees of running AI agents with the MCP servers they started and each process's network connections."},
+    {"name": "list_connections", "description": "Established TCP connections with the owning process and the organisation behind the peer address when known."},
+    {"name": "explain_process", "description": "Signature, ancestry, children, connections, findings and autostarts for one process."},
+    {"name": "list_listening_ports", "description": "Processes accepting TCP connections on a network interface."},
+    {"name": "list_autostarts", "description": "Run keys, Startup folder items, services, scheduled tasks and Winlogon values, with signature status."},
+    {"name": "login_activity", "description": "Failed and Remote Desktop logons from the last 24 hours (needs administrator rights)."}
+  ],
+  "keywords": ["security", "windows", "mcp", "ai-agents", "network", "prompt-injection"],
+  "license": "MIT",
+  "compatibility": {
+    "platforms": ["win32"]
+  }
+}

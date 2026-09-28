@@ -42,9 +42,14 @@ open to the network. Recording made with `go run ./tools/democast` and
 
 ## Install
 
-```
-go build -trimpath -ldflags "-s -w" -o agentegress.exe ./cmd/agentegress
-```
+- **Claude Desktop, one click:** download
+  [`agentegress-windows.mcpb`](https://github.com/co2water/agentegress/releases/latest/download/agentegress-windows.mcpb)
+  and open it; Claude Desktop shows an install dialog. No config file to edit.
+- **Binary:** download the zip for your CPU from the
+  [latest release](https://github.com/co2water/agentegress/releases/latest). Every asset has a
+  SHA-256 in `checksums.txt` and a build attestation:
+  `gh attestation verify <file> -R co2water/agentegress`.
+- **From source (Go 1.27+):** `go install github.com/co2water/agentegress/cmd/agentegress@latest`
 
 ## Use
 
@@ -62,7 +67,7 @@ agentegress mcp                   # read-only MCP server on stdio
 
 Claude Code: `claude mcp add agentegress -- C:\path\to\agentegress.exe mcp`
 
-Claude Desktop (`claude_desktop_config.json`):
+Claude Desktop: install the `.mcpb` above, or add it to `claude_desktop_config.json` by hand:
 
 ```json
 { "mcpServers": { "agentegress": { "command": "C:\\path\\to\\agentegress.exe", "args": ["mcp"] } } }
