@@ -1,5 +1,7 @@
 # agentegress
 
+**English** · [繁體中文](README.zh-TW.md) · [简体中文](README.zh-CN.md)
+
 **See which AI agent — and which of its MCP servers — is talking to what on your Windows PC, and check the PC for signs of compromise with a verdict that text on the machine cannot talk an AI out of.**
 
 > Status: pre-alpha. Windows 10/11 x64. Read-only. Opens no network connection of its own.
