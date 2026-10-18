@@ -1,5 +1,3 @@
-//go:build windows
-
 // Command agentegress shows which AI agent, and which of its MCP servers, is
 // talking to what, and checks the host for signs of compromise. Read-only; it
 // never opens a network connection of its own.

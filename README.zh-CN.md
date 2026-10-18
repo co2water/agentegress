@@ -117,6 +117,8 @@ go run ./tools/redteam -fixtures-only                  # 生成红队测试用�
 go run ./tools/redteam -mode both -n 3 -model sonnet   # 红队评测（会调用模型，需要费用）
 ```
 
+`Dockerfile` 是给 MCP 目录网站用的：它们会在 Linux 沙箱里构建服务器来读取工具列表。容器使用合成电脑 `examples/clean.json` 的数据；实际扫描仍然需要 Windows。
+
 测试数据含有攻击模式的字符串。请把它们放在文件里：杀毒软件看到这种文字出现在进程的命令行上会发出警告。
 
 里程碑笔记（繁体中文）：[规格](docs/spec-p1.md)、[spike 0](docs/spike-0.md)、[W1](docs/w1.md)、[W2](docs/w2.md)、[W3](docs/w3.md)；[独立审查记录](docs/review-2026-09-25.md)（英文）。

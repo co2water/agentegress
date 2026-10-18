@@ -186,6 +186,9 @@ go run ./tools/redteam -fixtures-only                  # write red-team fixture 
 go run ./tools/redteam -mode both -n 3 -model sonnet   # red-team eval (calls a model; costs money)
 ```
 
+The `Dockerfile` is for MCP directories that build servers in a Linux sandbox to read their tool
+list: it serves the synthetic `examples/clean.json` machine. Live scanning needs Windows.
+
 Test data contains attack-style strings. Keep them in files: antivirus flags such text when it
 appears on a process command line.
 

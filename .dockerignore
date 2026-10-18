@@ -1,0 +1,5 @@
+.git
+bin
+redteam-out
+docs
+*.exe
