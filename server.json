@@ -8,12 +8,12 @@
     "source": "github"
   },
   "websiteUrl": "https://github.com/co2water/agentegress",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "packages": [
     {
       "registryType": "mcpb",
-      "identifier": "https://github.com/co2water/agentegress/releases/download/v0.1.2/agentegress-windows.mcpb",
-      "fileSha256": "2bb77f31ecd0595879e4094451cdc4ab68badb8af9c27a074d78b9cb4ea89930",
+      "identifier": "https://github.com/co2water/agentegress/releases/download/v0.1.3/agentegress-windows.mcpb",
+      "fileSha256": "6a0ce079219ae52a72a382354549166c4994afcc058c672b819e3c5b24d40df2",
       "transport": {
         "type": "stdio"
       }
