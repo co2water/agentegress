@@ -191,11 +191,22 @@ type subject struct {
 	payload bool     // loaded by a host program rather than the program itself
 	updated bool     // renamed aside by an updater; the file now in its place is validly signed
 	limit   Severity // when set, the highest level an unsigned or unverifiable file reaches
+	// dangling: the reference only names a file to start later (an autostart
+	// entry), so a missing file is not running code. A running process whose
+	// file is gone (deleted after it started) is not dangling and is judged in full.
+	dangling bool
+	// otherAccount: the path was expanded from %VARIABLES% with this scan's
+	// account, but the entry may run as another one (SYSTEM, another user),
+	// for which the file can exist elsewhere.
+	otherAccount bool
 }
+
+func (sb subject) gone() bool { return sb.dangling && missing(sb.sig) }
 
 // worst picks the subject with the highest severity. A host program and the
 // file it loads are both judged (second review: a renamed, unsigned
-// "rundll32.exe" hid behind the signed DLL it loaded); ties go to the payload.
+// "rundll32.exe" hid behind the signed DLL it loaded); ties go to a file that
+// is there, then to the payload.
 func worst(subs []subject) (subject, Severity, bool) {
 	var best subject
 	top, found := Severity(0), false
@@ -207,7 +218,18 @@ func worst(subs []subject) (subject, Severity, bool) {
 		if ok && sb.limit != 0 && sev > sb.limit && !tampered(sb.sig) {
 			sev = sb.limit
 		}
-		if ok && (sev > top || sev == top && sb.payload) {
+		if ok && sb.gone() {
+			// Winget review: a leftover entry is not running code, but it is
+			// never below low: payload and shortcut parsing can be pointed at
+			// a decoy path, and in a writable folder a file put there later
+			// would start. Medium when the path depends on which account runs it.
+			sev = Low
+			if sb.otherAccount {
+				sev = Medium
+			}
+		}
+		tie := sev == top && (best.gone() && !sb.gone() || best.gone() == sb.gone() && sb.payload)
+		if ok && (sev > top || tie) {
 			best, top, found = sb, sev, true
 		}
 	}
@@ -271,11 +293,46 @@ func exeName(path string) string {
 }
 
 func autostartSubjects(a snapshot.Autostart) []subject {
-	out := []subject{{path: a.Target, sig: a.Signature, userDir: a.UserDir, payload: a.Host != ""}}
+	// An unquoted command line with a space in the program's path is not
+	// dangling: Windows tries the shorter prefixes first ("C:\Users\a\My.exe"
+	// for "C:\Users\a\My Tools\x.exe"), so a missing file there can be the
+	// unquoted-path hijack, not a leftover. Scheduled tasks keep the program
+	// apart from its arguments and shortcuts store a target, so neither is ambiguous.
+	// A host program that is there runs first; what it loads is an argument.
+	dangling := a.Kind == "scheduled-task" || a.Kind == "startup-folder" || !unquotedSpaced(a.Command) ||
+		a.Host != "" && !missing(a.HostSignature)
+	// Code review: a machine-scope entry may run as SYSTEM or another user, so
+	// "%LOCALAPPDATA%\x.exe" missing for this account says little about theirs.
+	// Services run as service accounts, so the same holds for one whose file
+	// (or ServiceDll, already expanded) is in this user's folders.
+	other := a.Scope == "machine" && (strings.Contains(a.Command, "%") || a.Kind == "service" && a.UserDir)
+	out := []subject{{path: a.Target, sig: a.Signature, userDir: a.UserDir, payload: a.Host != "", dangling: dangling, otherAccount: other}}
 	if a.Host != "" {
-		out = append(out, subject{path: a.Host, sig: a.HostSignature, userDir: a.HostUserDir})
+		out = append(out, subject{path: a.Host, sig: a.HostSignature, userDir: a.HostUserDir, dangling: dangling, otherAccount: other})
 	}
 	return out
+}
+
+// unquotedSpaced reports an unquoted command line with more than one word
+// before its first switch. Windows then tries each longer prefix in turn, so
+// the resolved target is only one of the files that could run (re-review:
+// "C:\Users\a\My Apps\tool -x" resolves to "My.exe", which has no space).
+func unquotedSpaced(cmd string) bool {
+	c := strings.TrimPrefix(collect.ExpandEnv(strings.TrimSpace(cmd)), `\??\`)
+	if c == "" || strings.HasPrefix(c, `"`) {
+		return false
+	}
+	words := strings.Fields(c)
+	for i, w := range words {
+		if i > 0 && (strings.HasPrefix(w, "/") || strings.HasPrefix(w, "-")) {
+			return i > 1
+		}
+	}
+	return len(words) > 1
+}
+
+func missing(sig *collect.Signature) bool {
+	return sig != nil && sig.Status == collect.SigError && sig.Detail == collect.DetailMissing
 }
 
 // whatRuns names the verified subject. The host name comes from our fixed list
@@ -588,6 +645,7 @@ func ruleH3Logons(s *snapshot.Snapshot) []Finding {
 
 func ruleH4UnsignedAutostart(s *snapshot.Snapshot) []Finding {
 	var out []Finding
+	seen := map[string]int{}
 	for _, a := range s.Autostarts {
 		if a.Disabled {
 			continue
@@ -606,13 +664,45 @@ func ruleH4UnsignedAutostart(s *snapshot.Snapshot) []Finding {
 		} else if a.Host != "" {
 			what = "the host program that loads it"
 		}
-		out = append(out, Finding{
+		// The ID names the entry as well as the file: two entries starting the
+		// same program are two findings, and acknowledging one must not cover
+		// the other (seen on a clean test VM with two OneDrive tasks).
+		idIn := a.Kind + "|" + a.Location + "|" + a.Name + "|" + sb.path
+		f := Finding{
 			Severity: sev,
 			Title:    "A program that is not validly signed starts automatically",
 			Detail:   fmt.Sprintf("Started by a %s entry (%s scope); %s is %s.%s", kindWords(a.Kind), a.Scope, what, sigWords(sb.sig), where),
 			Evidence: ev("subject", sb.path, "entry_name", a.Name, "command", a.Command, "location", a.Location),
 			file:     sb.path,
-		})
+		}
+		if sb.gone() {
+			// No vendor exception: a task's name and path are as easy to
+			// imitate as anything else. The common harmless cause is told,
+			// and the level does not depend on who made the entry.
+			where = ""
+			if sb.otherAccount {
+				where = " The path comes from environment variables expanded for your account; if the entry runs as another account (SYSTEM or another user), the file may exist for that account, so check the entry's account and what it would run."
+			}
+			if sb.userDir {
+				where += " The folder is one any program running as you can write to, so a file placed there later would start automatically; if you do not use this program, the entry can be removed."
+			}
+			f.Title = "An autostart entry points to a file that does not exist"
+			f.Detail = fmt.Sprintf("A %s entry (%s scope) would start %s, but that file is not there. This is usually left behind by an app that was removed or not installed for this user.%s", kindWords(a.Kind), a.Scope, what, where)
+			// No file to bind an acknowledgement to; the ID marks the state
+			// instead, so a file that appears later is reported afresh.
+			f.file = ""
+			idIn += "|missing"
+		}
+		f.ID = findingID("H4", idIn)
+		// One task with two actions on the same file: keep the higher level.
+		if i, ok := seen[f.ID]; ok {
+			if f.Severity > out[i].Severity {
+				out[i] = f
+			}
+			continue
+		}
+		seen[f.ID] = len(out)
+		out = append(out, f)
 	}
 	return out
 }
@@ -646,16 +736,21 @@ func ruleH5Firewall(s *snapshot.Snapshot) []Finding {
 
 func ruleH6AutostartDownloadExec(s *snapshot.Snapshot) []Finding {
 	var out []Finding
+	seen := map[string]bool{}
 	for _, a := range s.Autostarts {
 		if a.Disabled {
 			continue
 		}
-		if label := matchAny(downloadExec, a.Command); label != "" {
+		// Third review, item 14: the ID covers the command, so an
+		// acknowledged entry that is later rewritten is reported again.
+		// Location and name already identify the entry; a task repeating
+		// one action is reported once.
+		id := findingID("H6", a.Location+"|"+a.Name+"|"+a.Command)
+		if label := matchAny(downloadExec, a.Command); label != "" && !seen[id] {
+			seen[id] = true
 			out = append(out, Finding{
 				Severity: High,
-				// Third review, item 14: the ID covers the command, so an
-				// acknowledged entry that is later rewritten is reported again.
-				ID:       findingID("H6", a.Location+"|"+a.Name+"|"+a.Command),
+				ID:       id,
 				Title:    "Something that starts automatically downloads and runs code",
 				Detail:   fmt.Sprintf("Pattern: %s, in a %s entry.", label, kindWords(a.Kind)),
 				Evidence: ev("subject", a.Location+"|"+a.Name, "command", a.Command, "entry_name", a.Name),

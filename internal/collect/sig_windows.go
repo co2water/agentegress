@@ -4,7 +4,9 @@ package collect
 
 import (
 	"encoding/hex"
+	"errors"
 	"fmt"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"runtime"
@@ -143,6 +145,11 @@ func verifyFile(path string, depth int) Signature {
 		// A bare name that did not resolve, or a relative path: which file
 		// runs depends on a search path or working directory we do not know.
 		return Signature{Status: SigError, Detail: DetailNotFullPath}
+	}
+	// Only "not found" counts as missing; access denied on the file or a
+	// parent folder stays "unreadable" below.
+	if _, err := os.Lstat(path); errors.Is(err, fs.ErrNotExist) {
+		return Signature{Status: SigError, Detail: DetailMissing}
 	}
 	if isReparsePoint(path) {
 		// A symbolic link (WinGet puts its portable programs behind them) is

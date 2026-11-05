@@ -62,6 +62,12 @@ const (
 // user-writable %LOCALAPPDATA%\Microsoft\WindowsApps — so it rates medium.
 const DetailNotFullPath = "not a full local path; not opened"
 
+// DetailMissing is the SigError detail for a path where no file exists (a
+// file that exists but cannot be read keeps the generic "unreadable" detail).
+// An autostart entry pointing at a missing file runs nothing today, so it
+// rates lower than an unverifiable file that is there.
+const DetailMissing = "file does not exist"
+
 // Signature is the result of verifying one file.
 type Signature struct {
 	Status  SigStatus `json:"status"`

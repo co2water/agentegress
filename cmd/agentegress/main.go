@@ -55,11 +55,7 @@ file is tied to the file's SHA-256: if the file changes, the finding returns.
 `
 
 func main() {
-	args := os.Args[1:]
-	cmd := "scan"
-	if len(args) > 0 && args[0] != "" && args[0][0] != '-' {
-		cmd, args = args[0], args[1:]
-	}
+	cmd, args := command(os.Args[1:])
 	switch cmd {
 	case "scan":
 		scan(args)
@@ -77,6 +73,19 @@ func main() {
 		fmt.Fprintf(os.Stderr, "unknown command %q\n\n%s", cmd, usage)
 		os.Exit(2)
 	}
+}
+
+// command splits the subcommand from its arguments; with none it is a scan.
+// "-version" and "--version", typed out of habit, mean "version" instead of
+// failing as undefined scan flags.
+func command(args []string) (string, []string) {
+	if len(args) > 0 && (args[0] == "-version" || args[0] == "--version") {
+		return "version", args[1:]
+	}
+	if len(args) > 0 && args[0] != "" && args[0][0] != '-' {
+		return args[0], args[1:]
+	}
+	return "scan", args
 }
 
 // evaluate gathers, runs the rules and applies acknowledgements.

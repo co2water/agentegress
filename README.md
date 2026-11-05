@@ -93,7 +93,7 @@ masked), connection addresses — to the model provider you use.
 | A4 | Agent process connected to a peer no provider list or DNS name explains | medium (non-web port) · info |
 | H1 / H2 | Program (or the file a script host runs) not validly signed, talking out / listening | high (tampered; unsigned or unreadable binary in a user-writable folder) · medium (unsigned elsewhere, untrusted chain, script in a user-writable folder, file on a network share or named without a full path, uv-managed runtime of a configured MCP server, an agent renamed aside by its updater whose replacement is signed) · low (unreadable elsewhere) |
 | H3 | Failed logons from the internet, RDP logons from outside (needs admin) | high · medium · info |
-| H4 | Autostart whose target (or loaded payload) is not validly signed | as H1 |
+| H4 | Autostart whose target (or loaded payload) is not validly signed, or does not exist | as H1 · medium (target file does not exist and a machine-wide entry names it through %VARIABLES%, or a service names it in a user folder: it may be elsewhere for the account that runs it) · low (target file does not exist). An unquoted Run, service or Winlogon command with more than one word before its first switch is rated as H1 even when the file is missing, since Windows may run a longer path instead |
 | H5 | Firewall profile turned off | medium |
 | H6 | Autostart that downloads and runs code | high |
 | H7 | Remote Desktop enabled | info |
